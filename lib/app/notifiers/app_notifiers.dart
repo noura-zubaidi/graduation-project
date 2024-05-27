@@ -10,11 +10,7 @@ class AppNotifier extends ChangeNotifier {
 //Main api Books
   Future<Books> getBookData() async {
     var res = await bookApi.getBooks();
-    //print(res);
     var data = jsonDecode(res);
-    // print(data["items"][0]["volumeInfo"]["authors"]);
-    // data["items"];
-
     return Books.fromJson(data);
   }
 
