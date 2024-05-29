@@ -2,10 +2,12 @@ import 'package:books_application/app/constants/constants.dart';
 import 'package:books_application/presentation/screens/categories.dart';
 import 'package:books_application/presentation/screens/home_screen.dart';
 import 'package:books_application/presentation/screens/profile_screen.dart';
+import 'package:books_application/presentation/screens/quotes_screen.dart';
+
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  MainScreen({Key? key}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -13,8 +15,9 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-  final screens = const [
+  final screens = [
     HomeScreen(),
+    QuotesScreen(),
     ProfileScreen(),
     Categories(),
   ];
@@ -59,8 +62,12 @@ class _MainScreenState extends State<MainScreen> {
                 label: 'Home',
               ),
               BottomNavigationBarItem(
+                icon: Icon(Icons.note_rounded),
+                label: 'Quotes',
+              ),
+              BottomNavigationBarItem(
                 icon: Icon(Icons.person),
-                label: 'Profile',
+                label: 'profile',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.category),

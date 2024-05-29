@@ -1,25 +1,28 @@
 import 'package:books_application/app/constants/constants.dart';
-import 'package:books_application/app/notifiers/app_notifiers.dart';
 import 'package:books_application/presentation/screens/main_screen.dart';
+import 'package:books_application/services/authentication.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:books_application/app/notifiers/app_notifiers.dart';
+
 import 'package:books_application/presentation/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(
-    url: 'https://jqlqghozldmspsrxiwes.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxbHFnaG96bGRtc3Bzcnhpd2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4MDY3NDksImV4cCI6MjAzMjM4Mjc0OX0.qrpMN1BbWUrcn6zYBw3LcWoGNIKhTdavKdR55h5msWQ',
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  runApp(const MyApp());
+  final authService = AuthService();
+  bool isLoggedIn = await authService.isLoggedIn();
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
+  final bool isLoggedIn;
+  MyApp({required this.isLoggedIn});
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -29,7 +32,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(textTheme: textTheme),
-        home: MainScreen(),
+        home: isLoggedIn ? MainScreen() : WelcomeScreen(),
       ),
     );
   }

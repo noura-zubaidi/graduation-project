@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:books_application/app/constants/constants.dart';
 import 'package:books_application/presentation/screens/home_screen.dart';
+import 'package:books_application/presentation/screens/main_screen.dart';
 import 'package:books_application/presentation/screens/signup_screen.dart';
+import 'package:books_application/services/authentication.dart';
 import 'package:books_application/utils/constant.dart';
 import 'package:books_application/utils/snackbar_extension.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> _formkey = GlobalKey();
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  AuthService userService1 = AuthService();
 
   @override
   void initState() {
@@ -34,49 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
 
     super.dispose();
-  }
-
-  void _logIn() async {
-    final isValid = _formkey.currentState?.validate();
-    if (isValid != null && isValid) {
-      await _setLoadingState(true);
-
-      try {
-        await supabase.auth.signInWithPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-        await _setLoadingState(false);
-        navigateToHome();
-      } on AuthException catch (e) {
-        context.showSnackBar(
-          message: e.message,
-          backgroundColor: const Color(0XCD40401C),
-        );
-        await _setLoadingState(false);
-      } catch (e) {
-        context.showSnackBar(
-          message: e.toString(),
-          backgroundColor: const Color(0XCD40401C),
-        );
-        await _setLoadingState(false);
-      }
-    }
-  }
-
-  Future<void> _setLoadingState(bool isLoading) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('_isLoading', isLoading);
-  }
-
-  void navigateToHome() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const HomeScreen()));
-  }
-
-  void _navigateToSignup() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => SignUpScreen()));
   }
 
   @override
@@ -154,8 +116,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           )),
                       const SizedBox(height: 30),
                       ElevatedButton(
-                          onPressed: () {
-                            _logIn();
+                          onPressed: () async {
+                            final message = await AuthService().login(
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            );
+
+                            if (message!.contains('Success')) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => MainScreen(),
+                                ),
+                              );
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(message),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -172,7 +150,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.all(5),
                         child: InkWell(
                           onTap: () {
-                            _navigateToSignup();
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const SignUpScreen()));
                           },
                           child: Text('Don\'t Have An Account? Sign Up',
                               style: TextStyle(

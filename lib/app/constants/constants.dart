@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 TextTheme textTheme = TextTheme(
   headlineSmall: GoogleFonts.sourceSerif4(
-    fontSize: 32,
+    fontSize: 25,
     color: Colors.black87,
     fontWeight: FontWeight.bold,
   ),

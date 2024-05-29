@@ -1,6 +1,10 @@
+import 'dart:collection';
+
 import 'package:books_application/app/constants/constants.dart';
 
 import 'package:books_application/presentation/screens/login_screen.dart';
+import 'package:books_application/presentation/screens/main_screen.dart';
+import 'package:books_application/services/authentication.dart';
 import 'package:books_application/utils/constant.dart';
 import 'package:books_application/utils/snackbar_extension.dart';
 import 'package:flutter/material.dart';
@@ -16,16 +20,18 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   bool _isLoading = false;
   GlobalKey<FormState> _formkey = GlobalKey();
-  late TextEditingController _emailController;
-  late TextEditingController _passwordController;
-  late TextEditingController _nameController;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  HashMap userMap = HashMap();
+  AuthService userService1 = AuthService();
 
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-    _nameController = TextEditingController();
+    _emailController;
+    _passwordController;
+    _nameController;
   }
 
   @override
@@ -35,40 +41,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _nameController.dispose();
 
     super.dispose();
-  }
-
-  void _signUp() async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      await supabase.auth.signUp(
-          email: _emailController.text,
-          password: _passwordController.text,
-          data: {'username': _nameController.text.toLowerCase()});
-
-      setState(() {
-        _isLoading = false;
-      });
-      _navigateToLogin();
-    } on AuthException catch (e) {
-      context.showSnackBar(
-          message: e.message, backgroundColor: const Color(0XCD40401C));
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      context.showSnackBar(
-          message: e.toString(), backgroundColor: const Color(0XCD40401C));
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _navigateToLogin() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
   @override
@@ -175,8 +147,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           )),
                       const SizedBox(height: 30),
                       ElevatedButton(
-                          onPressed: () {
-                            _signUp();
+                          onPressed: () async {
+                            final message = await AuthService().registration(
+                              name: _nameController.text,
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            );
+                            if (message!.contains('Success')) {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => LoginScreen()));
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(message),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -193,7 +178,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         padding: const EdgeInsets.all(5),
                         child: InkWell(
                           onTap: () {
-                            _navigateToLogin();
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => LoginScreen()));
                           },
                           child: Text('Already Have An Account? Log In',
                               style: TextStyle(
