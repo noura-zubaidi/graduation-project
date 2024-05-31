@@ -66,21 +66,21 @@ class AuthService {
     }
   }
 
-  Future<void> addQuote(String quoteText, String author) async {
+  Future<void> addQuote(String bookId, String quoteText) async {
     try {
       final user = _firebaseAuth.currentUser;
       if (user != null) {
-        final userQuotesCollection = _firebaseFirestore
-            .collection('quotes')
-            .doc(user.uid)
+        final bookQuotesCollection = _firebaseFirestore
+            .collection('books')
+            .doc(bookId)
             .collection('quotes');
-        await userQuotesCollection.add({
+        await bookQuotesCollection.add({
           'quoteText': quoteText,
-          'author': author,
           'dateAdded': Timestamp.now(),
         });
       } else {
         // Handle the case where the user is not logged in
+        print("User is not logged in.");
       }
     } catch (e) {
       print("Error adding quote: ${e.toString()}");
@@ -89,16 +89,16 @@ class AuthService {
   }
 
   // Get User's Quotes (Stream)
-  Stream<QuerySnapshot<Map<String, dynamic>>> getUserQuotes() {
-    final user = _firebaseAuth.currentUser;
-    if (user != null) {
-      final userQuotesCollection = _firebaseFirestore
-          .collection('quotes')
-          .doc(user.uid)
+  Stream<QuerySnapshot<Map<String, dynamic>>> getBookQuotes(String bookId) {
+    try {
+      final bookQuotesCollection = _firebaseFirestore
+          .collection('books')
+          .doc(bookId)
           .collection('quotes');
-      return userQuotesCollection.snapshots();
-    } else {
-      // Handle the case where the user is not logged in
+      return bookQuotesCollection.snapshots();
+    } catch (e) {
+      print("Error retrieving quotes: ${e.toString()}");
+      // Handle error appropriately
       return Stream.empty();
     }
   }
@@ -121,8 +121,39 @@ class AuthService {
         return null;
       }
     } else {
+      // Return a user object with null values if not logged in
+      return {
+        'name': null,
+        'email': null,
+        'bio': null,
+        'image': null,
+      };
+    }
+  }
+
+  Future<String?> editUserData({
+    required String name,
+    required String email,
+    String? bio,
+    String? image,
+  }) async {
+    final user = _firebaseAuth.currentUser;
+    if (user != null) {
+      try {
+        await _firebaseFirestore.collection('users').doc(user.uid).update({
+          'name': name,
+          'email': email,
+          'bio': bio,
+          'image': image,
+        });
+        return 'Success';
+      } catch (e) {
+        print('Error updating user data: ${e.toString()}');
+        return e.toString();
+      }
+    } else {
       // Handle the case where the user is not logged in
-      return null;
+      return 'User is not logged in.';
     }
   }
 
@@ -141,6 +172,7 @@ class AuthService {
   // Logout
   Future<void> logout() async {
     await _firebaseAuth.signOut();
-    await saveLoginState(false);
+    final prefs = await _prefs;
+    await prefs.remove('isLoggedIn'); // Remove the saved login state
   }
 }

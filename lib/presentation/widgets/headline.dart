@@ -28,7 +28,9 @@ class Headline extends StatelessWidget {
             },
             child: Text(
               "See All",
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: TextStyle(
+                fontFamily: 'Merri',
+              ),
             ),
           )
         ],

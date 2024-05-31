@@ -1,6 +1,10 @@
 import 'package:books_application/app/constants/constants.dart';
 import 'package:books_application/app/notifiers/app_notifiers.dart';
 import 'package:books_application/core/model/DetailModel.dart';
+import 'package:books_application/presentation/screens/add_review_screen.dart';
+import 'package:books_application/presentation/screens/book_reviews.dart';
+import 'package:books_application/presentation/screens/quotes_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,6 +21,20 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
+  String? userId;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserId();
+  }
+
+  Future<void> _fetchUserId() async {
+    final user = await FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      userId = user.uid;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height / 815;
@@ -134,13 +152,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ),
                                         const Spacer(),
                                         Text(
-                                          "${snapshot.data?.volumeInfo?.pageCount} \$",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headlineMedium,
-                                        ),
-                                        const Spacer(),
-                                        Text(
                                           "${snapshot.data?.volumeInfo?.pageCount} Pages",
                                           style: Theme.of(context)
                                               .textTheme
@@ -158,9 +169,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     children: [
                                       OutlinedButton(
                                         onPressed: () {
-                                          //this button takes me to add review page
-                                          //the review should be stored in the review history page and in firestore along with
-                                          //book id and book name
+                                          if (userId != null) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ReviewForm(
+                                                  bookId: snapshot.data?.id ??
+                                                      '', // Get bookId from snapshot.data
+                                                  userId: userId!,
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            print('User not logged in!');
+                                          }
                                         },
                                         style: OutlinedButton.styleFrom(
                                             side: const BorderSide(width: 1)),
@@ -172,11 +195,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                         ),
                                       ),
                                       OutlinedButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  QuotesScreen(
+                                                bookId: widget.id,
+                                              ),
+                                            ),
+                                          );
+                                        },
                                         style: OutlinedButton.styleFrom(
                                             side: const BorderSide(width: 1)),
                                         child: Text(
-                                          "WANT TO READ",
+                                          "BOOK QUOTES",
                                           style: Theme.of(context)
                                               .textTheme
                                               .headlineMedium,
@@ -219,7 +252,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .headlineMedium),
-                                            Text("Categorie",
+                                            Text("Category",
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .headlineMedium)
@@ -291,42 +324,72 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     trimExpandedText: ' ...Read Less',
                                   ),
                                   const SizedBox(height: 10),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.black),
-                                    onPressed: () async {
-                                      final infoLink =
-                                          snapshot.data?.volumeInfo?.infoLink;
-                                      if (infoLink != null &&
-                                          infoLink.isNotEmpty) {
-                                        Uri url = Uri.parse(infoLink);
-                                        if (await canLaunchUrl(url)) {
-                                          await launchUrl(url,
-                                              mode: LaunchMode
-                                                  .externalApplication);
-                                        } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                                content: Text(
-                                                    'Could not launch $url')),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                            side: const BorderSide(width: 1)),
+                                        onPressed: () async {
+                                          final infoLink = snapshot
+                                              .data?.volumeInfo?.infoLink;
+                                          if (infoLink != null &&
+                                              infoLink.isNotEmpty) {
+                                            Uri url = Uri.parse(infoLink);
+                                            if (await canLaunchUrl(url)) {
+                                              await launchUrl(url,
+                                                  mode: LaunchMode
+                                                      .externalApplication);
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        'Could not launch $url')),
+                                              );
+                                            }
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Info link is not available')),
+                                            );
+                                          }
+                                        },
+                                        child: Text(
+                                          'More Info',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineMedium,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 30,
+                                      ),
+                                      OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                            side: const BorderSide(width: 1)),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ReviewsScreen(
+                                                bookId: widget.id,
+                                              ),
+                                            ),
                                           );
-                                        }
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                              content: Text(
-                                                  'Info link is not available')),
-                                        );
-                                      }
-                                    },
-                                    child: Text(
-                                      'More Info',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 16),
-                                    ),
-                                  ),
+                                        },
+                                        child: Text(
+                                          'book reviews',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineMedium,
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
                             ),

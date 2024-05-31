@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class QuotesScreen extends StatefulWidget {
-  QuotesScreen({super.key});
+  final String bookId;
+
+  QuotesScreen({super.key, required this.bookId});
 
   @override
   State<QuotesScreen> createState() => _QuotesScreenState();
@@ -16,12 +18,11 @@ class _QuotesScreenState extends State<QuotesScreen> {
   final _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final _quoteTextController = TextEditingController();
-  final _authorController = TextEditingController();
 
   @override
   void dispose() {
     _quoteTextController.dispose();
-    _authorController.dispose();
+
     super.dispose();
   }
 
@@ -29,9 +30,11 @@ class _QuotesScreenState extends State<QuotesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.only(left: 12, right: 12, top: 20, bottom: 20),
+        padding:
+            const EdgeInsets.only(left: 12, right: 12, top: 40, bottom: 20),
         child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: _authService.getUserQuotes(), // Get user's quotes
+          stream:
+              _authService.getBookQuotes(widget.bookId), // Get book's quotes
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
@@ -46,15 +49,19 @@ class _QuotesScreenState extends State<QuotesScreen> {
               itemCount: quotes.length,
               itemBuilder: (context, index) {
                 final quote = quotes[index].data() as Map<String, dynamic>;
-                return ListTile(
-                  title: Text(
-                    quote['quoteText'],
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  subtitle: Text(
-                    'By: ${quote['author']}',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
+                return Column(
+                  children: [
+                    ListTile(
+                      title: Text(
+                        quote['quoteText'],
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ),
+                    const Divider(
+                      color: Colors.black,
+                      thickness: 1,
+                    )
+                  ],
                 );
               },
             );
@@ -62,34 +69,36 @@ class _QuotesScreenState extends State<QuotesScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0XCDBDB07C),
-        shape: CircleBorder(),
+        backgroundColor: Colors.black,
+        shape: const CircleBorder(),
         onPressed: () {
           showDialog(
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: Text('Add New Quote'),
+                contentTextStyle: TextStyle(
+                  fontFamily: 'Merri',
+                ),
+                title: const Text(
+                  textAlign: TextAlign.center,
+                  'Add New Quote',
+                ),
                 content: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
+                    children: [
                       TextFormField(
                         controller: _quoteTextController,
-                        decoration: InputDecoration(labelText: 'Quote Text'),
+                        decoration: InputDecoration(
+                          labelText: 'Quote Text',
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a quote';
                           }
                           return null;
                         },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _authorController,
-                        decoration:
-                            InputDecoration(labelText: 'Author (Optional)'),
                       ),
                     ],
                   ),
@@ -99,22 +108,23 @@ class _QuotesScreenState extends State<QuotesScreen> {
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the dialog
                     },
-                    child: Text('Cancel'),
+                    child:
+                        Text('Cancel', style: TextStyle(color: Colors.black)),
                   ),
                   TextButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         // Add the quote
                         _authService.addQuote(
-                          _quoteTextController.text,
-                          _authorController.text,
-                        );
+                            widget.bookId, _quoteTextController.text);
                         Navigator.of(context).pop(); // Close the dialog
                         _quoteTextController.clear(); // Clear the input fields
-                        _authorController.clear();
                       }
                     },
-                    child: Text('Add'),
+                    child: Text(
+                      'Add',
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
                 ],
               );

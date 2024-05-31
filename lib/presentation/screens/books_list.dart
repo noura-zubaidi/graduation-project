@@ -193,13 +193,6 @@ class BookList extends StatelessWidget {
                                         color: Colors.transparent,
                                         borderRadius: BorderRadius.circular(20),
                                       ),
-                                      child: Text(
-                                        "${book.volumeInfo?.pageCount ?? 'N/A'}\$",
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w500),
-                                      ),
                                     ))
                                   ],
                                 ),

@@ -17,7 +17,6 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final screens = [
     HomeScreen(),
-    QuotesScreen(),
     ProfileScreen(),
     Categories(),
   ];
@@ -58,19 +57,15 @@ class _MainScreenState extends State<MainScreen> {
             unselectedLabelStyle: const TextStyle(fontSize: 13),
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
+                icon: Icon(Icons.home_rounded),
                 label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.note_rounded),
-                label: 'Quotes',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person),
                 label: 'profile',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.category),
+                icon: Icon(Icons.my_library_books_rounded),
                 label: 'Categories',
               ),
             ],

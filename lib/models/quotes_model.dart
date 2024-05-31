@@ -4,7 +4,6 @@ class Quote {
   String? quoteText;
   String? author;
   Timestamp? dateAdded;
-  // ... other quote fields
 
   Quote({this.quoteText, this.author, this.dateAdded});
 
@@ -13,7 +12,6 @@ class Quote {
       'quoteText': quoteText,
       'author': author,
       'dateAdded': dateAdded,
-      // ... other quote fields
     };
   }
 
@@ -22,7 +20,6 @@ class Quote {
       quoteText: map['quoteText'],
       author: map['author'],
       dateAdded: map['dateAdded'],
-      // ... other quote fields
     );
   }
 }
