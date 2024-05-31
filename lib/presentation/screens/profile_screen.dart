@@ -50,10 +50,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 decoration: InputDecoration(labelText: 'Name'),
               ),
               TextField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-              ),
-              TextField(
                 controller: _bioController,
                 decoration: InputDecoration(labelText: 'Bio'),
               ),
@@ -73,12 +69,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               onPressed: () async {
                 final name = _nameController.text;
-                final email = _emailController.text;
+
                 final bio = _bioController.text;
                 final image = _imageController.text;
                 final result = await _authService.editUserData(
                   name: name,
-                  email: email,
                   bio: bio,
                   image: image,
                 );

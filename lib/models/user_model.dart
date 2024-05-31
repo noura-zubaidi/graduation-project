@@ -1,4 +1,4 @@
-class User {
+class UserModel {
   String? uid;
   String? name;
   String? email;
@@ -6,7 +6,7 @@ class User {
   String? image;
   int? readingChallenge;
 
-  User({
+  UserModel({
     this.uid,
     this.name,
     this.password,
@@ -26,8 +26,8 @@ class User {
     };
   }
 
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
       uid: map['uid'],
       name: map['name'],
       email: map['email'],

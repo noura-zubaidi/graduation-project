@@ -133,7 +133,6 @@ class AuthService {
 
   Future<String?> editUserData({
     required String name,
-    required String email,
     String? bio,
     String? image,
   }) async {
@@ -142,7 +141,6 @@ class AuthService {
       try {
         await _firebaseFirestore.collection('users').doc(user.uid).update({
           'name': name,
-          'email': email,
           'bio': bio,
           'image': image,
         });
